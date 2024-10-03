@@ -34,6 +34,9 @@ def create_user(name, username, password, group_names):
 # database/setup.py (adicionando criação do grupo admin)
 if __name__ == "__main__":
     create_tables()
-    create_group("admin")  # Adicionando o grupo admin
+    create_group("admin")
+    create_group("faturamento")
 
-    create_user("Admin", "admin", "senha1234", ["admin"])  # Criando um usuário admin
+    create_user(
+        "Admin", "admin", "senha1234", ["admin", "faturamento"]
+    )  # Criando um usuário admin

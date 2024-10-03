@@ -5,6 +5,8 @@ services:
       - "8502:8501"
     depends_on:
       - db
+    env_file:
+      - .env
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
     volumes:
@@ -23,19 +25,19 @@ services:
     networks:
       - app-network
 
-  pgadmin:
-    image: dpage/pgadmin4
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
-      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
-    ports:
-      - "5050:80"
-    depends_on:
-      - db
-    volumes:
-      - ./servers.json:/pgadmin4/servers.json
-    networks:
-      - app-network
+  # pgadmin:
+  #   image: dpage/pgadmin4
+  #   environment:
+  #     - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
+  #     - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
+  #   ports:
+  #     - "5050:80"
+  #   depends_on:
+  #     - db
+  #   volumes:
+  #     - ./servers.json:/pgadmin4/servers.json
+  #   networks:
+  #     - app-network
 
 volumes:
   pgdata:

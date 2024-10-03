@@ -1,12 +1,11 @@
-from . import admin
+from . import admin, faturamento
 
 group_views = {
-    # 'faturamento': {
-    #     'Visualização 1 do Grupo 1': grupo1.view_grupo1_viz1,
-    #     'Visualização 2 do Grupo 1': grupo1.view_grupo1_viz2,
-    # },
+    "faturamento": {
+        "Faturamento": faturamento.view_faturamento,
+    },
     "admin": {
-        "Painel Administrativo": admin.admin_manage,
+        "Configurações": admin.admin_manage,
     },
 }
 
