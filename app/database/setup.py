@@ -1,5 +1,6 @@
-from database import engine, SessionLocal
-from models import Base, User, Group
+# database/setup.py
+from database.database import engine, SessionLocal
+from database.models import Base, User, Group
 import bcrypt
 
 def create_tables():
@@ -28,14 +29,10 @@ def create_user(name, username, password, group_names):
     session.commit()
     session.close()
 
+# database/setup.py (adicionando criação do grupo admin)
 if __name__ == '__main__':
     create_tables()
-    # Criar grupos
-    create_group('grupo1')
-    create_group('grupo2')
-    create_group('grupo3')
+    create_group('admin')  # Adicionando o grupo admin
 
-    # Criar usuários
-    create_user('Alice', 'alice', 'senha_alice', ['grupo1', 'grupo2'])
-    create_user('Bob', 'bob', 'senha_bob', ['grupo2'])
-    create_user('Carlos', 'carlos', 'senha_carlos', ['grupo3'])
+    create_user('Admin', 'admin', 'senha1234', ['admin'])  # Criando um usuário admin
+
