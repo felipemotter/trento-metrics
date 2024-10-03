@@ -2,6 +2,7 @@
 import streamlit as st
 from database.external import ExternalSessionLocal
 
+
 def view_viz1():
     st.write("Visualização 1 do Grupo 1")
     session = ExternalSessionLocal()
@@ -10,6 +11,7 @@ def view_viz1():
     data = result.fetchall()
     st.write(data)
     session.close()
+
 
 def view_viz2():
     st.write("Visualização 2 do Grupo 1")
