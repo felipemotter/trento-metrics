@@ -1,0 +1,21 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Attach to Docker",
+            "type": "debugpy",  // Mantém 'python' como tipo
+            "request": "attach",
+            "connect": {
+                "host": "localhost",
+                "port": 5678
+            },
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}",
+                    "remoteRoot": "/app"
+                }
+            ],
+            "preLaunchTask": "docker-compose-up-debug"
+        }
+    ]
+}

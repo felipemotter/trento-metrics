@@ -1,0 +1,34 @@
+// .vscode/tasks.json
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "docker-compose-up-debug",
+            "type": "shell",
+            "command": "docker compose up --build",
+            "isBackground": true,
+            "problemMatcher": {
+                "owner": "docker",
+                "fileLocation": ["relative", "${workspaceFolder}"],
+                "pattern": {
+                    "regexp": "^(ERROR|WARNING):\\s*(.*)$",
+                    "severity": 1,
+                    "message": 2
+                },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "Starting services",
+                    "endsPattern": ".*"
+                }
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            }
+        }
+    ]
+}

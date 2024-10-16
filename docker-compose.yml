@@ -2,13 +2,15 @@ services:
   app:
     build: .
     ports:
-      - "8502:8501"
+      - "8502:8501"   # Porta do Streamlit
+      - "5678:5678"   # Porta para debugpy
     depends_on:
       - db
     env_file:
       - .env
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      - DEBUG=${DEBUG:-false}  # Define DEBUG a partir do ambiente, padrão false
     volumes:
       - .:/app
     networks:
