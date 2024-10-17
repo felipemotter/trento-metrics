@@ -10,7 +10,6 @@ from data_processing.classic_revenue_report import (
 
 
 def create_chart(df_plot):
-    df_plot["Mês"] = df_plot["Mês"].astype(int)
     df_plot["formatted_sale_value"] = df_plot["sale_value"].apply(
         format_brazilian_currency
     )
@@ -18,12 +17,12 @@ def create_chart(df_plot):
         alt.Chart(df_plot)
         .mark_line(point=True)
         .encode(
-            x=alt.X("Mês:O", title="Mês", axis=alt.Axis(labelAngle=0)),
+            x=alt.X("Mês_num:O", title="Mês", axis=alt.Axis(labelAngle=0)),
             y=alt.Y("sale_value:Q", title="Valor de Venda"),
             color=alt.Color("Ano:N", title="Ano"),
             tooltip=[
                 alt.Tooltip("Ano:N", title="Ano"),
-                alt.Tooltip("Mês:O", title="Mês"),
+                alt.Tooltip("Mês_num:O", title="Mês"),
                 alt.Tooltip("formatted_sale_value:N", title="Valor de Venda"),
             ],
         )
@@ -36,9 +35,6 @@ def create_chart(df_plot):
 
 
 def view_revenue():
-    """
-    Main function for revenue visualization in Streamlit.
-    """
     st.title("FATURAMENTO")
 
     df = get_anual_invoice_move_lines_df()
@@ -69,7 +65,7 @@ def view_revenue():
 
             with col_chart:
                 df_plot = (
-                    df_family.groupby(["Ano", "Mês"])
+                    df_family.groupby(["Ano", "Mês_num"])
                     .agg({"sale_value": "sum"})
                     .reset_index()
                 )

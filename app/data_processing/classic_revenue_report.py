@@ -2,6 +2,22 @@ import pandas as pd
 from data_processing.base import get_invoice_move_lines_df, handle_empty_families
 from utils.constants import PRODUCT_FAMILY_OTHERS
 
+# Dicionário de mapeamento dos meses
+MONTH_DICT = {
+    1: "Janeiro",
+    2: "Fevereiro",
+    3: "Março",
+    4: "Abril",
+    5: "Maio",
+    6: "Junho",
+    7: "Julho",
+    8: "Agosto",
+    9: "Setembro",
+    10: "Outubro",
+    11: "Novembro",
+    12: "Dezembro",
+}
+
 
 def get_anual_invoice_move_lines_df():
     df = get_invoice_move_lines_df()
@@ -10,7 +26,14 @@ def get_anual_invoice_move_lines_df():
         df = df[["confirm_date", "sale_value", "product_family"]]
 
         df["Ano"] = df["confirm_date"].dt.year
-        df["Mês"] = df["confirm_date"].dt.month
+        df["Mês_num"] = df["confirm_date"].dt.month
+        df["Mês"] = df["Mês_num"].map(MONTH_DICT)
+
+        # Define a ordem dos meses
+        df["Mês"] = pd.Categorical(
+            df["Mês"], categories=list(MONTH_DICT.values()), ordered=True
+        )
+
         df = process_anual_invoice_move_lines_df(df)
 
     return df
@@ -25,8 +48,8 @@ def process_anual_invoice_move_lines_df(df):
     )
 
     custom_values = {
-        1: 10000,  # January
-        2: 15000,  # February
+        1: 10000,  # Janeiro
+        2: 15000,  # Fevereiro
     }
 
     df = apply_custom_values(df, year=2023, custom_values=custom_values)
@@ -38,7 +61,7 @@ def process_anual_invoice_move_lines_df(df):
         fill_na=0,
     )
 
-    df = df.sort_values(["product_family", "Ano", "Mês"])
+    df = df.sort_values(["product_family", "Ano", "Mês_num"])
     handle_empty_families(df)
     return df
 
@@ -67,17 +90,20 @@ def clean_column(df, column, patterns=None, fill_na=0, new_column=None):
 
 
 def apply_custom_values(df, year, custom_values, product_family=PRODUCT_FAMILY_OTHERS):
-    for month, value in custom_values.items():
-        exists = ((df["Ano"] == year) & (df["Mês"] == month)).any()
+    for month_num, value in custom_values.items():
+        exists = ((df["Ano"] == year) & (df["Mês_num"] == month_num)).any()
         if exists:
-            df.loc[(df["Ano"] == year) & (df["Mês"] == month), "sale_value"] = value
+            df.loc[(df["Ano"] == year) & (df["Mês_num"] == month_num), "sale_value"] = (
+                value
+            )
         else:
             new_record = {
-                "confirm_date": pd.Timestamp(year, month, 1),
+                "confirm_date": pd.Timestamp(year, month_num, 1),
                 "sale_value": value,
                 "product_family": product_family,
                 "Ano": year,
-                "Mês": month,
+                "Mês_num": month_num,
+                "Mês": MONTH_DICT[month_num],
             }
             df = pd.concat([df, pd.DataFrame([new_record])], ignore_index=True)
     return df
@@ -93,7 +119,7 @@ def reorganize_families(families):
     if "TOTAL" in families:
         families.remove("TOTAL")
 
-    # Insere 'Total' no início da lista
+    # Insere 'TOTAL' no início da lista
     families.insert(0, "TOTAL")
 
     # Move 'Outros' para o final da lista
@@ -105,7 +131,9 @@ def reorganize_families(families):
 
 
 def process_classic_revenue_report_df(df):
-    df_monthly = df.groupby(["Ano", "Mês"]).agg({"sale_value": "sum"}).reset_index()
+    df_monthly = (
+        df.groupby(["Ano", "Mês_num", "Mês"]).agg({"sale_value": "sum"}).reset_index()
+    )
     df_monthly["Acumulado"] = df_monthly.groupby(["Ano"])["sale_value"].cumsum()
 
     years = sorted(df_monthly["Ano"].unique(), reverse=True)
@@ -117,21 +145,21 @@ def process_classic_revenue_report_df(df):
     previous_year = years[1]
 
     df_current = df_monthly[df_monthly["Ano"] == current_year][
-        ["Mês", "sale_value", "Acumulado"]
+        ["Mês_num", "Mês", "sale_value", "Acumulado"]
     ].copy()
     df_current.rename(
         columns={"sale_value": "Total", "Acumulado": "Acumulado"}, inplace=True
     )
 
     df_previous = df_monthly[df_monthly["Ano"] == previous_year][
-        ["Mês", "sale_value", "Acumulado"]
+        ["Mês_num", "Mês", "sale_value", "Acumulado"]
     ].copy()
     df_previous.rename(
         columns={"sale_value": "Total Anterior", "Acumulado": "Acumulado Anterior"},
         inplace=True,
     )
 
-    df_merged = pd.merge(df_current, df_previous, on="Mês", how="outer")
+    df_merged = pd.merge(df_current, df_previous, on=["Mês_num", "Mês"], how="outer")
 
     df_merged.fillna(0, inplace=True)
 
@@ -147,6 +175,9 @@ def process_classic_revenue_report_df(df):
     df_merged.replace([float("inf"), -float("inf")], 0, inplace=True)
     df_merged["Variação (%)"] = df_merged["Variação (%)"].fillna(0)
     df_merged["Variação Acumulada (%)"] = df_merged["Variação Acumulada (%)"].fillna(0)
+
+    # Ordena pelos números dos meses para manter a ordem correta
+    df_merged = df_merged.sort_values("Mês_num")
 
     df_merged = df_merged[
         [
