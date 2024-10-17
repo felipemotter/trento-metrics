@@ -54,18 +54,18 @@ def view_revenue():
                 st.warning(warning_message)
                 continue
 
-            df_display = format_display_df(report_df)
+            df_display = format_display_df(report_df).set_index("Mês")
 
             st.subheader(f"{family}")
 
             col_table, col_chart = st.columns([2, 1])
 
             with col_table:
-                st.table(df_display.style.hide(axis="index"))
+                st.table(df_display)
 
             with col_chart:
                 df_plot = (
-                    df_family.groupby(["Ano", "Mês_num"])
+                    df_family.groupby(["Ano", "Mês_num", "Mês"])
                     .agg({"sale_value": "sum"})
                     .reset_index()
                 )
