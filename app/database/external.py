@@ -22,23 +22,22 @@ def get_external_database_url():
 
 
 def get_external_session():
-    EXTERNAL_DATABASE_URL = get_external_database_url()
-    external_engine = create_engine(EXTERNAL_DATABASE_URL)
+    external_database_url = get_external_database_url()
+    external_engine = create_engine(external_database_url)
     ExternalSessionLocal = sessionmaker(
         autocommit=False, autoflush=False, bind=external_engine
     )
     return ExternalSessionLocal()
 
 
-def get_faturamento_data():
+def get_invoice_move_lines_data():
     session = get_external_session()
     try:
         query = text("""
             SELECT
-                aml.part_confirm_date,
-                aml.name,
-                aml.sale_value,
-                aml.product_family
+                aml.part_confirm_date AS confirm_date,
+                aml.sale_value AS sale_value,
+                aml.product_family AS product_family
             FROM
                 account_move_line aml
             JOIN
@@ -47,7 +46,11 @@ def get_faturamento_data():
                 aml.parent_state = 'posted'
                 AND am.move_type = 'out_invoice'
                 AND aml.part_confirm_date IS NOT NULL
-                AND aml.exclude_from_invoice_tab = false;
+                AND aml.exclude_from_invoice_tab = false
+                AND EXTRACT(YEAR FROM aml.part_confirm_date) IN (
+                    EXTRACT(YEAR FROM CURRENT_DATE),
+                    EXTRACT(YEAR FROM CURRENT_DATE) - 1
+                )
         """)
         result = session.execute(query)
         data = result.fetchall()
