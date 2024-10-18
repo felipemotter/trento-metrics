@@ -1,12 +1,14 @@
-from . import admin, classic_revenue_report
+from . import classic_revenue_report
+
+# from . import admin
 
 group_views = {
     "faturamento": {
         "Faturamento Clássico": classic_revenue_report.view_revenue,
     },
-    "admin": {
-        "Configurações": admin.admin_manage,
-    },
+    # "admin": {
+    #     "Configurações": admin.admin_manage,
+    # },
 }
 
 
