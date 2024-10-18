@@ -48,10 +48,9 @@ def process_anual_invoice_move_lines_df(df):
     )
 
     custom_values = {
-        1: 10000,  # Janeiro
-        2: 15000,  # Fevereiro
+        1: 989767.48,  # Janeiro
+        2: 915975.66,  # Fevereiro
     }
-
     df = apply_custom_values(df, year=2023, custom_values=custom_values)
 
     df = clean_column(
