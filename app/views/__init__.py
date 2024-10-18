@@ -1,4 +1,5 @@
 from . import classic_revenue_report
+from .sidebar import create_sidebar
 
 # from . import admin
 
@@ -18,7 +19,9 @@ def load_views(user):
     st.set_page_config(
         page_title="Trento Metrics",
         layout="wide",
+        initial_sidebar_state="collapsed",
     )
+    create_sidebar()
     user_groups = [group.name for group in user.groups]
     available_views = {}
 
